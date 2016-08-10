@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Gallery</title>
+<style type="text/css">
+	html{
+		margin: 0px;
+		padding: 0px;
+	}
+	#all{
+		margin: 0px;
+		padding: 0px;
+		border: 0px;
+		position: absolute;
+	}
+	.photos{
+		margin-top: 0px;
+		position: absolute;
+		z-index: 0;
+	}
+
+</style>
+</head>
+<body>
+<div id="all">
+
+</div>
+<script src="photos.js"></script>
+
+<script type="text/javascript">
+	"use strict";
+	var photoArrayInnerHTML = "";
+	var allElem = document.getElementById('all');
+	var currentPhotoElem;
+	var currentPhotoElemStyle;
+	var photoX;
+	var mouseClickPhotoID = 0; //photo dragged
+	var mouseSwitchPhotoID =0; //photo dropped
+	var mouseDownBool = false;
+
+	var photoLeft;
+	var photoTop;
+
+	var mouseOriginX;
+	var mouseOriginY;
+
+	placePhotos();
+	document.addEventListener("mousemove", handleMouseMove, false);
+	document.addEventListener("mousedown", handleMouseDown, false);
+	document.addEventListener("mouseup", handleMouseUp, false);
+
+	function placePhotos(){
+		photoArrayInnerHTML = "";
+		photoX =20;
+		for (var i = 0; i < photoArray.length; i++) {
+			photoArrayInnerHTML +=  '<img alt="photos" class="photos" id="' +i+ '" src="' + photoArray[i] + '">';
+
+		}
+		allElem.innerHTML = photoArrayInnerHTML;
+
+		organizePhotos();
+	}
+
+	//console.log(document.defaultView.getComputedStyle(document.getElementById("1"),null).left);
+
+
+	function handleMouseMove(event){
+		if(mouseDownBool){
+			currentPhotoElem  = document.getElementById(mouseClickPhotoID);
+			currentPhotoElemStyle = document.defaultView.getComputedStyle(currentPhotoElem,null);
+			currentPhotoElem.style.left = photoLeft + (event.clientX - mouseOriginX) +"px";
+			currentPhotoElem.style.top = photoTop + (event.clientY - mouseOriginY) +"px";
+		}
+	}
+
+	function updatePhotoStyle(){
+		currentPhotoElem  = document.getElementById(mouseClickPhotoID);
+		currentPhotoElemStyle = document.defaultView.getComputedStyle(currentPhotoElem,null);
+		currentPhotoElem.style.zIndex = 1;
+		photoLeft = pi(currentPhotoElemStyle.left);
+		photoTop = pi(currentPhotoElemStyle.top);
+	}
+
+	function handleMouseDown(event){
+		mouseClickPhotoID = checkMouseInPhotos(event.clientX, event.clientY);
+		if (mouseClickPhotoID!=-1 ){
+			mouseDownBool = true;
+			event.preventDefault();
+			updatePhotoStyle();
+			mouseOriginX = event.clientX;
+			mouseOriginY = event.clientY;
+		}
+		else{
+			mouseDownBool = false;
+		}
+	}
+
+	function handleMouseUp(event){
+		mouseDownBool=false;
+		currentPhotoElem.style.zIndex = 0;
+		organizePhotos(); //!!!!
+		mouseSwitchPhotoID = checkMouseInPhotos(event.clientX, event.clientY);
+		//console.log(mouseClickPhotoID, mouseSwitchPhotoID);
+		if(mouseSwitchPhotoID==-1){
+			organizePhotos();
+		}
+		else{
+			switchPhotos(mouseClickPhotoID, mouseSwitchPhotoID);
+		}
+
+	}
+
+	function organizePhotos(){
+		photoX =20;
+		for (var i = 0; i < photoArray.length; i++) {
+			currentPhotoElem = document.getElementById(i);
+			currentPhotoElem.style.left = photoX +"px";
+			currentPhotoElem.style.top = "20px";
+			photoX +=240;
+		}
+	}
+
+	function switchPhotos(idA, idB){
+		var photoA= document.getElementById(idA);
+		var photoB = document.getElementById(idB);
+		photoA.id = idB;
+		photoB.id = idA;
+		organizePhotos();
+	}
+
+	function checkMouseInPhotos(mouseX, mouseY){
+		var photoLeft;
+		var photoRight;
+		var photoDown = 20+150+20;
+		var photoUp = 0;
+
+		for (var i = 0; i < photoArray.length; i++) {
+			currentPhotoElem = document.getElementById(i);
+			currentPhotoElemStyle = document.defaultView.getComputedStyle(currentPhotoElem,null);
+
+			photoLeft = pi(currentPhotoElemStyle.left)-20;
+			photoRight = photoLeft +20+220;
+
+			if ( mouseX >= photoLeft && mouseX <=photoRight){
+				if (mouseY>=photoUp && mouseY <= photoDown){
+					//console.log(i);
+					return i;
+				}
+			}
+		}
+		//console.log(-1);
+		return -1;
+	}
+	function pi(originString){
+		return parseInt(originString);
+	}
+</script>
+</body>
+</html>
+	
